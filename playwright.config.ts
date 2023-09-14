@@ -1,12 +1,6 @@
 import { defineConfig } from '@playwright/test';
 
 /**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-require('dotenv').config();
-
-/**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
@@ -18,10 +12,10 @@ export default defineConfig({
   reporter: 'html',
   timeout: 300_000,
   use: {
-    baseURL: "",
-    actionTimeout: 3000,
+    baseURL: '',
+    actionTimeout: 10000,
     trace: 'on-first-retry',
-    headless: false,
+    headless: true,
     viewport: { width: 1920, height: 1080 },
     launchOptions: {
       devtools: !process.env['CI'],

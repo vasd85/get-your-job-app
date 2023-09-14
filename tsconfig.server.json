@@ -1,14 +1,12 @@
 /* To learn more about this file see: https://angular.io/config/tsconfig. */
 {
   "extends": "./tsconfig.json",
+  "module": "CommonJS",
   "compilerOptions": {
-    "outDir": "./out-tsc/spec",
-    "types": [
-      "jasmine"
-    ]
+    "outDir": "./dist/server",
+    "types": ["node"]
   },
   "include": [
-    "client/**/*.spec.ts",
-    "client/**/*.d.ts"
+    "server/**/*.ts"
   ]
 }

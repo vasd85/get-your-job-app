@@ -2,13 +2,13 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./out-tsc/app",
-    "types": []
+    "outDir": "./dist/client",
+    "module": "ES2022"
   },
   "files": [
     "client/main.ts"
   ],
   "include": [
-    "client/**/*.d.ts"
+    "client/**/*.ts"
   ]
 }
