@@ -1,6 +1,6 @@
 import { IWebScraper } from './interfaces/i-web-scraper';
 import { Page } from '@playwright/test';
-import { RawJobs } from '../database/queries/raw-jobs';
+import { RawJobs } from '../../database/queries/raw-jobs';
 
 const baseUrl = 'https://www.glassdoor.com'; // TODO: get from DB
 const websiteId = 1; // TODO: get from DB

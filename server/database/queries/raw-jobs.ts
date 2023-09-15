@@ -1,5 +1,5 @@
 import * as sqlite3 from 'sqlite3';
-import { RawJob } from '../../models/rawJob';
+import { RawJob } from '../../models/raw-job';
 import * as util from 'util';
 
 export class RawJobs {
