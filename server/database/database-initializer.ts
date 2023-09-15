@@ -68,10 +68,10 @@ export class DatabaseInitializer {
       createSearchRequestsTable(db);
       createLanguagesTable(db);
       createSearchRequestsToLanguagesTable(db);
-      createAdvertisementsTable(db);
-      createAdToSearchRequestTable(db);
+      createRawJobsTable(db);
+      createRawJobsToSearchRequestTable(db);
       createRankedJobsTable(db);
-      createRankedJobsToAdsTable(db);
+      createRankedJobsToRawJobsTable(db);
 
       populateWebsitesTable(db);
       populateLanguagesTable(db);
@@ -124,9 +124,9 @@ const createSearchRequestsToLanguagesTable = (db: Database) => {
   `);
 };
 
-const createAdvertisementsTable = (db: Database) => {
+const createRawJobsTable = (db: Database) => {
   db.run(`
-      CREATE TABLE advertisements
+      CREATE TABLE raw_jobs
       (
           id           INTEGER NOT NULL PRIMARY KEY,
           job_title    TEXT    NOT NULL,
@@ -136,21 +136,21 @@ const createAdvertisementsTable = (db: Database) => {
           website_id   INTEGER NOT NULL,
           stop_trigger TEXT    NOT NULL,
           location     TEXT,
-          ad_post_id   TEXT,
+          job_post_id  TEXT,
           post_date    TEXT,
           FOREIGN KEY (website_id) REFERENCES websites (id)
       );
   `);
 };
 
-const createAdToSearchRequestTable = (db: Database) => {
+const createRawJobsToSearchRequestTable = (db: Database) => {
   db.run(`
-      CREATE TABLE ads_to_search_requests
+      CREATE TABLE raw_jobs_to_search_requests
       (
-          ad_id             INTEGER NOT NULL,
+          raw_job_id        INTEGER NOT NULL,
           search_request_id INTEGER NOT NULL,
-          PRIMARY KEY (ad_id, search_request_id),
-          FOREIGN KEY (ad_id) REFERENCES advertisements (id),
+          PRIMARY KEY (raw_job_id, search_request_id),
+          FOREIGN KEY (raw_job_id) REFERENCES raw_jobs (id),
           FOREIGN KEY (search_request_id) REFERENCES search_requests (id)
       );
   `);
@@ -177,15 +177,15 @@ const createRankedJobsTable = (db: Database) => {
   `);
 };
 
-const createRankedJobsToAdsTable = (db: Database) => {
+const createRankedJobsToRawJobsTable = (db: Database) => {
   db.run(`
-      CREATE TABLE ranked_jobs_to_ads
+      CREATE TABLE ranked_jobs_to_raw_jobs
       (
           ranked_jobs_id INTEGER NOT NULL,
-          ad_id          INTEGER NOT NULL,
-          PRIMARY KEY (ranked_jobs_id, ad_id),
+          raw_jobs_id    INTEGER NOT NULL,
+          PRIMARY KEY (ranked_jobs_id, raw_jobs_id),
           FOREIGN KEY (ranked_jobs_id) REFERENCES ranked_jobs (id),
-          FOREIGN KEY (ad_id) REFERENCES advertisements (id)
+          FOREIGN KEY (raw_jobs_id) REFERENCES raw_jobs (id)
       );
   `);
 };

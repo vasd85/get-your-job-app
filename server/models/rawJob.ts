@@ -1,4 +1,5 @@
-export type Job = {
+export type RawJob = {
+  id?: number;
   title: string;
   company: string;
   description: string;
@@ -6,6 +7,6 @@ export type Job = {
   websiteId: number;
   stopTrigger: string;
   location?: string;
-  adPostId?: string;
+  jobPostId?: string;
   postDate?: string;
 };

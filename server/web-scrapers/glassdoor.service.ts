@@ -1,6 +1,6 @@
 import { IWebScraper } from './interfaces/i-web-scraper';
 import { Page } from '@playwright/test';
-import { Job } from '../models/job';
+import { RawJobs } from '../database/queries/raw-jobs';
 
 const baseUrl = 'https://www.glassdoor.com'; // TODO: get from DB
 const websiteId = 1; // TODO: get from DB
@@ -56,33 +56,39 @@ export class GlassdoorService implements IWebScraper {
     }
 
     await this.page.locator('[data-test="sort-by-header"]').click();
-    await this.page.locator('[data-test="date_desc"]').click();
-  }
-
-  async collectJobs(): Promise<Job[]> {
-    let jobList: Job[] = [];
-
-    const nextPage = this.page.locator('[data-test="pagination-next"]');
-
-    let i = 0;
-    while ((await nextPage.isEnabled()) && i < 3) {
-      i++;
-      console.log(i);
-      const jobs = await this.collectOnePage();
-      jobList = [...jobList, ...jobs];
-      await nextPage.click();
+    if (!(await this.page.locator('[data-test="date_desc"]').isVisible())) {
+      await this.page.waitForTimeout(1000);
+      await this.page.locator('[data-test="sort-by-header"]').click();
     }
-
-    return jobList;
+    await this.page.locator('[data-test="date_desc"]').click();
+    await this.page.waitForTimeout(2000);
   }
 
-  // TODO implement this method to use it for stopping the scraping
-  private stopTrigger = async () => {};
+  async collectJobs(): Promise<void> {
+    let page = 1;
+    while (await this.scrapPage()) {
+      await this.page.locator('[data-test="pagination-next"]').click();
 
-  private collectOnePage = async () => {
-    let jobList: Job[] = [];
+      page++;
+      await this.page
+        .locator(`[data-test="pagination-link-${page}"]`)
+        .and(this.page.locator('.selected'))
+        .waitFor({ state: 'attached' });
+    }
+  }
+
+  private async scrapPage(): Promise<boolean> {
     const jobs = await this.page.locator('[data-test="jobListing"]').all();
+    const db = new RawJobs();
+
     for (const job of jobs) {
+      // stop scraping if stop trigger is found
+      const stopTrigger = (await job.getAttribute('data-id'))!;
+      if (await db.stopScraping(stopTrigger)) {
+        console.log('Stop scraping triggered');
+        return false;
+      }
+      // save job to DB
       await job.click();
       const jobLink = (await job
         .locator('[data-test="job-link"]')
@@ -100,10 +106,7 @@ export class GlassdoorService implements IWebScraper {
       const description = await this.page
         .locator('.jobDescriptionContent')
         .innerText();
-      await this.page.getByText('Show More', { exact: true }).click();
-      const stopTrigger = (await job.getAttribute('data-id'))!;
-
-      jobList.push({
+      db.insertRawJob({
         title,
         company,
         location,
@@ -113,7 +116,7 @@ export class GlassdoorService implements IWebScraper {
         stopTrigger,
       });
     }
-
-    return jobList;
-  };
+    // stop scraping if there is no next page
+    return this.page.locator('[data-test="pagination-next"]').isEnabled();
+  }
 }
